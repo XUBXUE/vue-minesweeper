@@ -7,6 +7,7 @@ interface BlockState {
   isMine?: boolean;
   aroundMineQuantity: number;
   sweeped: boolean;
+  flag: boolean;
 }
 
 const WIDTH = 10;
@@ -35,6 +36,7 @@ const numberColors = [
 ];
 
 let isBegin = false;
+let isFinish = false;
 
 const state = ref(
   Array.from({ length: HEIGHT }, (_, y) =>
@@ -45,6 +47,7 @@ const state = ref(
         y,
         aroundMineQuantity: 0,
         sweeped: false,
+        flag: false,
       }),
     ),
   ),
@@ -79,7 +82,8 @@ function countArountMines(): void {
 }
 
 function getClass(block: BlockState): string {
-  const { sweeped, isMine, aroundMineQuantity } = block;
+  const { sweeped, isMine, aroundMineQuantity, flag } = block;
+  if (flag) return 'bg-gray-500/20';
   if (!sweeped) return "bg-gray-500/20 hover:bg-gray-500/50";
   return isMine ? "bg-red-500" : numberColors[aroundMineQuantity - 1];
 }
@@ -95,12 +99,16 @@ function sweeperMore(block: BlockState) {
     
     if (!currentAroundBlock.sweeped) {
       currentAroundBlock.sweeped = true;
+      if (currentAroundBlock.flag) {
+        currentAroundBlock.flag = false;
+      }
       sweeperMore(currentAroundBlock);
     }
   });
 }
 
-function clickBlock(block: BlockState) {
+function sweepeBlock(block: BlockState) {
+  if (block.flag || isFinish) return;
   if (!isBegin) {
     generateMines(block);
     isBegin = true;
@@ -109,9 +117,25 @@ function clickBlock(block: BlockState) {
   block.sweeped = true;
   if (block.isMine) {
     alert("BOOOOM!");
+    isFinish = true;
   }
 
   sweeperMore(block);
+  checkResult();
+}
+
+function flagBlock(block: BlockState) {
+  if (block.sweeped || isFinish) return;
+  block.flag = !block.flag;
+}
+
+function checkResult() {
+  const blocks = state.value.flat();
+
+  if (blocks.every(block => block.sweeped || (block.flag && block.isMine))) {
+    alert('恭喜你，成功了~');
+    isFinish = true;
+  }
 }
 </script>
 
@@ -123,15 +147,19 @@ function clickBlock(block: BlockState) {
       :key="y"
     >
       <div
-        class="flex h-8 w-8 cursor-pointer items-center justify-center gap-px border border-gray-500/10 text-sm text-white/50"
+        class="flex h-8 w-8 cursor-pointer items-center justify-center gap-px border border-gray-500/10 text-sm"
         :class="getClass(block)"
         v-for="(block, x) in row"
         :key="x"
-        @click="clickBlock(block)"
+        @click="sweepeBlock(block)"
+        @contextmenu.prevent="flagBlock(block)"
       >
+        <template v-if="block.flag">
+          <div>⛳</div>
+        </template>
         <template v-if="block.sweeped">
-          <div v-if="block.isMine">x</div>
-          <div v-else>{{ block.aroundMineQuantity || "" }}</div>
+          <div v-if="block.isMine">💣</div>
+          <div v-else-if="block.aroundMineQuantity > 0">{{ block.aroundMineQuantity }}</div>
         </template>
       </div>
     </div>
