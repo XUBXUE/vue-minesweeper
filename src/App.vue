@@ -127,6 +127,7 @@ function sweepeBlock(block: BlockState) {
 function flagBlock(block: BlockState) {
   if (block.sweeped || isFinish) return;
   block.flag = !block.flag;
+  checkResult();
 }
 
 function checkResult() {
