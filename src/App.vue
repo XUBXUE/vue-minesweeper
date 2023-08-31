@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { watchEffect } from "vue";
-import { GamePlay } from "./composables";
+import { GamePlay, useDev } from "./composables";
+import { useStorage } from '@vueuse/core';
 
 const game = new GamePlay(10, 10);
 
-const state = game.state;
+const state = useStorage('game-state', game.state);
+
+const { dev, toggleDev } = useDev();
 
 watchEffect(() => {
   game.checkResult();
@@ -29,16 +32,17 @@ watchEffect(() => {
         <template v-if="block.flag">
           <div>⛳</div>
         </template>
-        <template v-if="block.sweeped">
+        <template v-if="block.sweeped || dev">
           <div v-if="block.isMine">💣</div>
-          <div v-else-if="block.aroundMineQuantity > 0">
-            {{ block.aroundMineQuantity }}
+          <div v-else>
+            {{ block.aroundMineQuantity || '' }}
           </div>
         </template>
       </div>
     </div>
-    <div class="m-2 flex justify-center items-center">
+    <div class="m-2 flex justify-center items-center gap-5">
       <button class="bg-gray-500/20 hover:bg-gray-500/50 text-white p-2 rounded" @click="game.reset()">Reset</button>
+      <button class="bg-gray-500/20 hover:bg-gray-500/50 text-white p-2 rounded" @click="toggleDev()">{{ dev ? 'Normal' : 'Dev' }}</button>
     </div>
   </div>
 </template>
