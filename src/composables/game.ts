@@ -55,17 +55,24 @@ export class GamePlay {
     this.countArountMines();
   }
 
+  private getSiblings(x1: number, y1: number) {
+    return aroundRelativePositions.map(([px, py]) => {
+      const x2 = x1 + px;
+      const y2 = y1 + py;
+      if (x2 < 0 || x2 >= this.width || y2 < 0 || y2 >= this.height) return;
+
+      return this.board[y2][x2];
+    }).filter(Boolean);
+  }
+
   private countArountMines(): void {
     this.state.value.board.forEach((row) => {
       row.forEach((block) => {
         const { x, y, isMine } = block;
         if (isMine) return;
-        aroundRelativePositions.forEach(([px, py]) => {
-          const mx = x + px;
-          const my = y + py;
-          if (mx < 0 || mx >= this.width || my < 0 || my >= this.height) return;
 
-          if (this.board[my][mx].isMine) {
+        this.getSiblings(x, y).forEach(sibling => {
+          if (sibling!.isMine) {
             block.aroundMineQuantity += 1;
           }
         });
@@ -95,18 +102,13 @@ export class GamePlay {
   private sweeperMore(block: BlockState) {
     if (block.aroundMineQuantity) return;
 
-    aroundRelativePositions.forEach(([px, py]) => {
-      const mx = block.x + px;
-      const my = block.y + py;
-      if (mx < 0 || mx >= this.width || my < 0 || my >= this.height) return;
-      const currentAroundBlock = this.board[my][mx];
-
-      if (!currentAroundBlock.sweeped) {
-        currentAroundBlock.sweeped = true;
-        if (currentAroundBlock.flag) {
-          currentAroundBlock.flag = false;
+    this.getSiblings(block.x, block.y).forEach(sibling => {
+      if (!sibling!.sweeped) {
+        sibling!.sweeped = true;
+        if (sibling!.flag) {
+          sibling!.flag = false;
         }
-        this.sweeperMore(currentAroundBlock);
+        this.sweeperMore(sibling!);
       }
     });
   }

@@ -15,7 +15,7 @@ watchEffect(() => {
 
 <template>
   <div class="flex justify-center items-center pt-10 flex-col">
-    <h2 class="text-gray-50 my-2">you win~</h2>
+    <h2 class="text-gray-50 my-2">playing</h2>
     <div>
       <div class="flex items-center justify-center" v-for="(row, y) in state.board" :key="y">
         <Block v-for="(block, x) in row" :key="x" :block="block" :class="game.getClass(block)"
