@@ -9,6 +9,7 @@ export class GamePlay {
   constructor(
     public width: number,
     public height: number,
+    public mineQuantity: number,
   ) {
     this.reset();
   }
@@ -25,10 +26,12 @@ export class GamePlay {
     return this.state.value.status !== 'playing';
   }
 
-  public reset(width = this.width, height = this.height) {
+  public reset(width = this.width, height = this.height, mineQuantity = this.mineQuantity) {
     this.state.value = {
       generatedMines: false,
       status: 'playing',
+      time: 0,
+      flags: mineQuantity,
       board: Array.from({ length: height }, (_, y) =>
         Array.from(
           { length: width },
@@ -44,12 +47,25 @@ export class GamePlay {
     };
   }
 
+  private randomInt(max: number, min = 0): number {
+    return Math.round(Math.random() * max + min);
+  }
+
   private generateMines(initial: BlockState): void {
-    for (const row of this.board) {
-      for (const block of row) {
-        if (initial.x === block.x && initial.x === block.x) continue;
-        block.isMine = Math.random() < 0.1;
-      }
+    let mineQuantity = 0;
+    const randomMine = () => {
+      const x = this.randomInt(this.width - 1);
+      const y = this.randomInt(this.height - 1);
+      const block = this.board[y][x];
+      if (initial.x === x && initial.x === y) return false;
+      if (block.isMine) return false;
+
+      block.isMine = true;
+      mineQuantity++;
+    }
+
+    while (mineQuantity < this.mineQuantity) {
+      randomMine();
     }
 
     this.countArountMines();
@@ -121,6 +137,11 @@ export class GamePlay {
     }
 
     block.sweeped = true;
+    if (block.flag) {
+      block.flag = false;
+      this.state.value.flags--;
+    }
+
     if (block.isMine) {
       block.lightBomb = true;
       this.state.value.status = 'lose';
@@ -135,18 +156,19 @@ export class GamePlay {
     if (block.sweeped || this.isOver) return;
 
     block.flag = !block.flag;
+
+    block.flag ? this.state.value.flags-- : this.state.value.flags++;
   }
 
   public checkResult() {
     if (this.isOver) return;
 
-    if (
-      this.blocks.every(
-        (block) => block.sweeped || (block.flag && block.isMine),
-      )
-    ) {
-      alert("恭喜你，成功了~");
+    const sweepedQuantity = this.blocks.filter(block => block.sweeped).length;
+
+    if (sweepedQuantity === this.blocks.length - this.mineQuantity) {
       this.state.value.status = 'won';
+      this.showFlags();
+      alert('you win~')
     }
   }
 
@@ -157,5 +179,13 @@ export class GamePlay {
         block.sweeped = true;
       }
     });
+  }
+
+  private showFlags() {
+    const noMineBlocks = this.blocks.filter((block) => block.isMine);
+    noMineBlocks.forEach(block => {
+      block.flag = true;
+      this.state.value.flags = 0;
+    })
   }
 }

@@ -12,4 +12,6 @@ export interface GameState {
   board: BlockState[][];
   generatedMines: boolean;
   status: 'playing' | 'won' | 'lose';
+  time: number;
+  flags: number;
 }

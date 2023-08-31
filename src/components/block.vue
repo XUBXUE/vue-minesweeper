@@ -7,7 +7,7 @@ defineProps<{ block: BlockState }>();
 
 <template>
   <div
-    class="flex h-8 w-8 cursor-pointer items-center justify-center gap-px border border-gray-500/10 text-sm text-white/50"
+    class="flex h-8 w-8 cursor-pointer items-center justify-center gap-px border border-gray-500/10 text-sm font-semibold"
   >
     <template v-if="block.flag">
       <div>⛳</div>
