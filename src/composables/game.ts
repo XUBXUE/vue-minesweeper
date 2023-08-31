@@ -4,7 +4,7 @@ import type { Ref } from "vue";
 import { aroundRelativePositions, numberColors } from "../enum";
 
 export class GamePlay {
-  state = ref() as Ref<GameState>;
+  public state = ref() as Ref<GameState>;
 
   constructor(
     public width: number,
@@ -21,10 +21,14 @@ export class GamePlay {
     return this.state.value.board.flat();
   }
 
-  reset(width = this.width, height = this.height) {
+  get isOver(): boolean {
+    return this.state.value.status !== 'playing';
+  }
+
+  public reset(width = this.width, height = this.height) {
     this.state.value = {
-      isBegin: false,
-      isEnd: false,
+      generatedMines: false,
+      status: 'playing',
       board: Array.from({ length: height }, (_, y) =>
         Array.from(
           { length: width },
@@ -40,7 +44,7 @@ export class GamePlay {
     };
   }
 
-  generateMines(initial: BlockState): void {
+  private generateMines(initial: BlockState): void {
     for (const row of this.board) {
       for (const block of row) {
         if (initial.x === block.x && initial.x === block.x) continue;
@@ -51,7 +55,7 @@ export class GamePlay {
     this.countArountMines();
   }
 
-  countArountMines(): void {
+  private countArountMines(): void {
     this.state.value.board.forEach((row) => {
       row.forEach((block) => {
         const { x, y, isMine } = block;
@@ -69,16 +73,16 @@ export class GamePlay {
     });
   }
 
-  getClass(block: BlockState): string {
+  public getClass(block: BlockState): string {
     const { sweeped, isMine, aroundMineQuantity, flag, lightBomb } = block;
     // 标记状态下的样式
-    const flagStyle = this.state.value.isEnd
+    const flagStyle = this.isOver
       ? isMine
         ? "bg-gray-500/20"
         : "bg-red-500/50"
       : "bg-gray-500/20";
     // 未被扫描状态下的样式
-    const unsweepedStyle = this.state.value.isEnd
+    const unsweepedStyle = this.isOver
       ? "bg-gray-500/20"
       : "bg-gray-500/20 hover:bg-gray-500/50";
     // 已被扫描状态下的样式
@@ -88,7 +92,7 @@ export class GamePlay {
     return flag ? flagStyle : sweeped ? sweepedStyle : unsweepedStyle;
   }
 
-  sweeperMore(block: BlockState) {
+  private sweeperMore(block: BlockState) {
     if (block.aroundMineQuantity) return;
 
     aroundRelativePositions.forEach(([px, py]) => {
@@ -107,17 +111,17 @@ export class GamePlay {
     });
   }
 
-  sweepeBlock(block: BlockState) {
-    if (block.flag || this.state.value.isEnd) return;
-    if (!this.state.value.isBegin) {
+  public sweepeBlock(block: BlockState) {
+    if (block.flag || this.isOver) return;
+    if (!this.state.value.generatedMines) {
       this.generateMines(block);
-      this.state.value.isBegin = true;
+      this.state.value.generatedMines = true;
     }
 
     block.sweeped = true;
     if (block.isMine) {
       block.lightBomb = true;
-      this.state.value.isEnd = true;
+      this.state.value.status = 'lose';
       this.showBombs();
       return;
     }
@@ -125,14 +129,14 @@ export class GamePlay {
     this.sweeperMore(block);
   }
 
-  flagBlock(block: BlockState) {
-    if (block.sweeped || this.state.value.isEnd) return;
+  public flagBlock(block: BlockState) {
+    if (block.sweeped || this.isOver) return;
 
     block.flag = !block.flag;
   }
 
-  checkResult() {
-    if (this.state.value.isEnd) return;
+  public checkResult() {
+    if (this.isOver) return;
 
     if (
       this.blocks.every(
@@ -140,11 +144,11 @@ export class GamePlay {
       )
     ) {
       alert("恭喜你，成功了~");
-      this.state.value.isEnd = true;
+      this.state.value.status = 'won';
     }
   }
 
-  showBombs() {
+  private showBombs() {
     const mineBlocks = this.blocks.filter((block) => block.isMine);
     mineBlocks.forEach((block) => {
       if (!block.flag) {

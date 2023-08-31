@@ -10,6 +10,6 @@ export interface BlockState {
 
 export interface GameState {
   board: BlockState[][];
-  isBegin: boolean;
-  isEnd: boolean;
+  generatedMines: boolean;
+  status: 'playing' | 'won' | 'lose';
 }

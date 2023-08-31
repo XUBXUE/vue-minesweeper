@@ -7,7 +7,7 @@ defineProps<{ block: BlockState }>();
 
 <template>
   <div
-    class="flex h-8 w-8 cursor-pointer items-center justify-center gap-px border border-gray-500/10 text-sm"
+    class="flex h-8 w-8 cursor-pointer items-center justify-center gap-px border border-gray-500/10 text-sm text-white/50"
   >
     <template v-if="block.flag">
       <div>⛳</div>
@@ -15,7 +15,7 @@ defineProps<{ block: BlockState }>();
     <template v-if="block.sweeped || dev">
       <div v-if="block.isMine">💣</div>
       <div v-else>
-        {{ block.aroundMineQuantity || "" }}
+        {{ block.aroundMineQuantity || dev ? block.aroundMineQuantity : '' }}
       </div>
     </template>
   </div>
