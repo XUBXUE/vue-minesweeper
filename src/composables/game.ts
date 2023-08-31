@@ -71,7 +71,6 @@ export class GamePlay {
 
   getClass(block: BlockState): string {
     const { sweeped, isMine, aroundMineQuantity, flag, lightBomb } = block;
-
     // 标记状态下的样式
     const flagStyle = this.state.value.isEnd
       ? isMine
