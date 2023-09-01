@@ -3,6 +3,8 @@ import type { BlockState, GameState } from "../type";
 import type { Ref } from "vue";
 import { aroundRelativePositions, numberColors } from "../enum";
 
+let timer: number;
+
 export class GamePlay {
   public state = ref() as Ref<GameState>;
 
@@ -26,25 +28,50 @@ export class GamePlay {
     return this.state.value.status !== 'playing';
   }
 
+  /**
+   * 重置游戏状态
+   * @param width 游戏区域宽度，默认为当前宽度
+   * @param height 游戏区域高度，默认为当前高度
+   * @param mineQuantity 地雷数量，默认为当前地雷数量
+   */
   public reset(width = this.width, height = this.height, mineQuantity = this.mineQuantity) {
+    // 清除计时器
+    this.overTiming();
+
+    // 更新游戏参数
+    this.width = width;
+    this.height = height;
+    this.mineQuantity = mineQuantity;
+
+    // 重置游戏状态
     this.state.value = {
       generatedMines: false,
       status: 'playing',
       time: 0,
       flags: mineQuantity,
-      board: Array.from({ length: height }, (_, y) =>
-        Array.from(
-          { length: width },
-          (_, x): BlockState => ({
-            x,
-            y,
-            aroundMineQuantity: 0,
-            sweeped: false,
-            flag: false,
-          }),
-        ),
-      ),
+      board: this.generateBoard(width, height),
     };
+  }
+
+  /**
+   * 生成游戏区域
+   * @param width 游戏区域宽度
+   * @param height 游戏区域高度
+   * @returns 游戏区域二维数组
+   */
+  private generateBoard(width: number, height: number): BlockState[][] {
+    return Array.from({ length: height }, (_, y) =>
+      Array.from(
+        { length: width },
+        (_, x): BlockState => ({
+          x,
+          y,
+          aroundMineQuantity: 0,
+          sweeped: false,
+          flag: false,
+        }),
+      ),
+    );
   }
 
   private randomInt(max: number, min = 0): number {
@@ -57,8 +84,8 @@ export class GamePlay {
       const x = this.randomInt(this.width - 1);
       const y = this.randomInt(this.height - 1);
       const block = this.board[y][x];
-      if (initial.x === x && initial.x === y) return false;
-      if (block.isMine) return false;
+      if (initial.x === x && initial.x === y) return;
+      if (block.isMine) return;
 
       block.isMine = true;
       mineQuantity++;
@@ -123,26 +150,35 @@ export class GamePlay {
         sibling!.sweeped = true;
         if (sibling!.flag) {
           sibling!.flag = false;
+          this.state.value.flags++;
         }
         this.sweeperMore(sibling!);
       }
     });
   }
 
+  private startTiming() {
+    timer = setInterval(() => {
+      this.state.value.time++
+    }, 1000);
+  }
+
+  private overTiming() {
+    clearInterval(timer);
+  }
+
   public sweepeBlock(block: BlockState) {
     if (block.flag || this.isOver) return;
     if (!this.state.value.generatedMines) {
-      this.generateMines(block);
       this.state.value.generatedMines = true;
+      this.startTiming();
+      this.generateMines(block);
     }
 
     block.sweeped = true;
-    if (block.flag) {
-      block.flag = false;
-      this.state.value.flags--;
-    }
 
     if (block.isMine) {
+      this.overTiming();
       block.lightBomb = true;
       this.state.value.status = 'lose';
       this.showBombs();
@@ -166,9 +202,9 @@ export class GamePlay {
     const sweepedQuantity = this.blocks.filter(block => block.sweeped).length;
 
     if (sweepedQuantity === this.blocks.length - this.mineQuantity) {
+      this.overTiming();
       this.state.value.status = 'won';
       this.showFlags();
-      alert('you win~')
     }
   }
 
