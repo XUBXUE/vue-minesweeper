@@ -47,7 +47,7 @@ watchEffect(() => {
   <div class="flex flex-col items-center justify-center pt-10">
     <div>
       <div class="my-2 flex items-center justify-between text-gray-50">
-        <div>Flag: {{ state.flags }}</div>
+        <div>Mines: {{ state.flags }}</div>
         <button
           class="rounded bg-gray-500/20 p-2 leading-none text-white hover:bg-gray-500/50"
           @click="game.reset()"
@@ -77,19 +77,19 @@ watchEffect(() => {
           class="rounded bg-gray-500/20 p-2 text-white hover:bg-gray-500/50"
           @click="simple"
         >
-          simple
+          Simple
         </button>
         <button
           class="rounded bg-gray-500/20 p-2 text-white hover:bg-gray-500/50"
           @click="normal"
         >
-          normal
+          Normal
         </button>
         <button
           class="rounded bg-gray-500/20 p-2 text-white hover:bg-gray-500/50"
           @click="difficult"
         >
-          difficult
+          Difficult
         </button>
         <!-- <button class="rounded bg-gray-500/20 p-2 text-white hover:bg-gray-500/50" @click="toggleDev()">
           {{ dev ? "Normal" : "Dev" }}
