@@ -189,7 +189,7 @@ export class GamePlay {
   }
 
   public flagBlock(block: BlockState) {
-    if (block.sweeped || this.isOver || !this.state.value.flags) return;
+    if (block.sweeped || this.isOver || (!this.state.value.flags && !block.flag)) return;
 
     block.flag = !block.flag;
 
