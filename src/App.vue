@@ -46,10 +46,10 @@ watchEffect(() => {
 <template>
   <div class="flex flex-col items-center justify-center pt-10">
     <div>
-      <div class="my-2 flex items-center justify-between text-gray-50">
+      <div class="my-3 flex items-center justify-between text-gray-50 text-sm">
         <div>Mines: {{ state.flags }}</div>
         <button
-          class="rounded bg-gray-500/20 p-2 leading-none text-white hover:bg-gray-500/50"
+          class="absolute left-1/2 -translate-x-1/2 rounded bg-gray-500/20 p-2 leading-none text-white hover:bg-gray-500/50"
           @click="game.reset()"
         >
           {{ emoji }}
@@ -72,21 +72,21 @@ watchEffect(() => {
           />
         </div>
       </div>
-      <div class="m-2 flex items-center justify-between">
+      <div class="mt-2 flex items-center justify-between">
         <button
-          class="rounded bg-gray-500/20 p-2 text-white hover:bg-gray-500/50"
+          class="rounded bg-gray-500/20 p-2 text-white text-xs hover:bg-gray-500/50"
           @click="simple"
         >
           Simple
         </button>
         <button
-          class="rounded bg-gray-500/20 p-2 text-white hover:bg-gray-500/50"
+          class="rounded bg-gray-500/20 p-2 text-white text-xs hover:bg-gray-500/50"
           @click="normal"
         >
           Normal
         </button>
         <button
-          class="rounded bg-gray-500/20 p-2 text-white hover:bg-gray-500/50"
+          class="rounded bg-gray-500/20 p-2 text-white text-xs hover:bg-gray-500/50"
           @click="difficult"
         >
           Difficult
