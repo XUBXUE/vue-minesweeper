@@ -218,8 +218,8 @@ export class GamePlay {
   }
 
   private showFlags() {
-    const noMineBlocks = this.blocks.filter((block) => block.isMine);
-    noMineBlocks.forEach(block => {
+    const minesBlock = this.blocks.filter((block) => block.isMine);
+    minesBlock.forEach(block => {
       block.flag = true;
       this.state.value.flags = 0;
     })
